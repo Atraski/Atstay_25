@@ -19,7 +19,7 @@ app.use(clerkMiddleware())
 //API to listen Clerk webhooks
 app.use('/api/clerk', clerkWebhooks);
 
-app.get("/", (req, res) =>res.send("API is running..."));
+app.get("/home", (req, res) =>res.send("API is running..."));
 
 
 const PORT = process.env.PORT || 5000;
