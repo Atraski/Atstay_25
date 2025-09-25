@@ -12,12 +12,20 @@ const app = express();
 
 app.use(cors());    
 
-//middleware
+// middleware for normal routes
 app.use(express.json());
-app.use(clerkMiddleware())
 
-//API to listen Clerk webhooks
-app.use('/api/clerk', clerkWebhooks);
+// Webhook route MUST receive raw body for svix verification.
+// Put this route BEFORE clerkMiddleware so webhook requests are NOT processed by clerkMiddleware.
+app.post(
+  "/api/clerk",
+  express.raw({ type: "application/json" }), // <-- important: raw buffer
+  clerkWebhooks
+);
+
+// Now apply Clerk middleware for other (authenticated) routes
+app.use(clerkMiddleware());
+
 
 app.get("/home", (req, res) =>res.send("API is running..."));
 
