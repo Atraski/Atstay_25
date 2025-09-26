@@ -1,36 +1,31 @@
-import express from "express"
+// The Corrected server.js (The Solution)
+
+import express from "express";
 import "dotenv/config";
 import cors from "cors";
-import connectDB from "./configs/db.js"; 
+import connectDB from "./configs/db.js";
 import { clerkMiddleware } from '@clerk/express';
 import clerkWebhooks from "./controllers/clerkWebhooks.js";
-
 
 connectDB();
 
 const app = express();
+app.use(cors());
 
-app.use(cors());    
-
-// middleware for normal routes
-app.use(express.json());
-
-// Webhook route MUST receive raw body for svix verification.
-// Put this route BEFORE clerkMiddleware so webhook requests are NOT processed by clerkMiddleware.
+// Webhook route MUST be before express.json()
 app.post(
   "/api/clerk",
-  express.raw({ type: "application/json" }), // <-- important: raw buffer
+  express.raw({ type: "application/json" }), // Keep this for the webhook
   clerkWebhooks
 );
+
+// Now, use the JSON middleware for all OTHER routes
+app.use(express.json());
 
 // Now apply Clerk middleware for other (authenticated) routes
 app.use(clerkMiddleware());
 
-
-app.get("/home", (req, res) =>res.send("API is running..."));
-
+app.get("/home", (req, res) => res.send("API is running..."));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-

@@ -1,41 +1,34 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    _id:{
-        type:String,
-        required:true
+  _id: {
+    type: String,
+    required: true,
+  },
+  username: {
+    type: String,
+    required: true,
+    default: "No Name",
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  image: {
+    type: String,
+    default: "",
+  },
+  role: {
+    type: String,
+    enum: ["user", "hotelOwner"],
+    default: "user",
+  },
+  recentSearchedCities: {
+    type: [String],
+    default: [],
+  },
+}, { timestamps: true });
 
-    },
-    username:{
-        type:String,
-        required:true
-
-    },
-    email:{
-        type:String,
-        required:true
-
-    },
-    image:{
-        type:String,
-        required:true
-
-    },
-    role:{
-        type:String,
-        enum:["user","hotelOwner"],
-        default:"user"
-
-    },
-    recentSearchedCities: [{
-        type: String,
-        required: false // Make it optional
-    }],  
-          
-    },
-    {timestamps:true}
-);
-
-const User = mongoose.model("User",userSchema)
+const User = mongoose.model("User", userSchema);
 
 export default User;
