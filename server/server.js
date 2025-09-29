@@ -13,7 +13,11 @@ const app = express();
 app.use(cors());
 
 // Webhook route MUST be before express.json()
-app.use('api/clerk', clerkWebhooks);
+app.post(
+  "/api/clerk",
+  express.raw({ type: "application/json" }), // Keep this for the webhook
+  clerkWebhooks
+);
 
 // Now, use the JSON middleware for all OTHER routes
 app.use(express.json());
