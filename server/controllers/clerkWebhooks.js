@@ -31,6 +31,8 @@ const clerkWebhooks  = async (req, res) => {
       recentSearchedCities: [],
     };
 
+    //Switch case for different webhook types
+
     switch (type) {
       case "user.created": {
         await User.create(userData);
