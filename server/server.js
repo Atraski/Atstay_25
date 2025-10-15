@@ -15,8 +15,10 @@ connectDB();
 connectCloudinary();
 
 const app = express();
-app.use(cors()); // Enable Cross-Origin Resource Sharing
-
+app.use(cors({
+  origin: ['https://atstay.in', 'http://localhost:5173'],  // Replace with your frontend's domain
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}));
 // API to listen to Stripe Webhooks
 // app.post("/api/stripe",express.raw({ type: "application/json" }),stripeWebhooks);
 
