@@ -10,7 +10,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/': {
-        target: 'https://atstay-loj2o.ondigitalocean.app', // <<-- IMPORTANT: Change this to your backend port
+        target: 'https://atstay-lo3gk.ondigitalocean.app', // <<-- IMPORTANT: Change this to your backend port
         changeOrigin: true,
         secure: false,      
       },
