@@ -16,7 +16,7 @@ connectCloudinary();
 
 const app = express();
 app.use(cors({
-  origin: ['https://atstay.in', 'http://localhost:5173', "http://stay.atstay.in"],  // Replace with your frontend's domain
+  origin: ['https://atstay.in', 'http://localhost:5173', "https://stay.atraski.com"],  // Replace with your frontend's domain
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
 // API to listen to Stripe Webhooks
