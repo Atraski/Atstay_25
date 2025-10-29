@@ -30,6 +30,7 @@ app.use(clerkMiddleware());
 app.use("/api/clerk", express.raw({ type: 'application/json' }), clerkWebhooks);
 
 app.get("/", (req, res) => res.send("API is working"));
+app.get("/api/test", (req, res) => res.json({ success: true, message: "Test route working" }));
 app.use("/api/user", userRouter);
 app.use("/api/hotels", hotelRouter);
 app.use("/api/rooms", roomRouter);

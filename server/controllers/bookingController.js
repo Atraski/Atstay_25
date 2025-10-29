@@ -38,10 +38,44 @@ export const checkAvailabilityAPI = async (req, res) => {
 // POST /api/bookings/book
 export const createBooking = async (req, res) => {
   try {
+    console.log("=== BOOKING REQUEST START ===");
+    console.log("Request body:", req.body);
+    console.log("User:", req.user);
+    console.log("=============================");
 
     const { room, checkInDate, checkOutDate, guests } = req.body;
 
-    const user = req.user._id;
+    // Validate required fields
+    if (!room || !checkInDate || !checkOutDate || !guests) {
+      return res.json({ 
+        success: false, 
+        message: "Missing required fields: room, checkInDate, checkOutDate, guests" 
+      });
+    }
+
+    // Handle both authenticated and guest bookings
+    let user = null;
+    let userEmail = null;
+    let userName = null;
+
+    if (req.user && req.user._id) {
+      // Authenticated user
+      user = req.user._id;
+      userEmail = req.user.email;
+      userName = req.user.username;
+    } else {
+      // Guest booking - require email in request body
+      const { guestEmail, guestName } = req.body;
+      if (!guestEmail) {
+        return res.json({ 
+          success: false, 
+          message: "Please provide email for booking",
+          requiresLogin: true
+        });
+      }
+      userEmail = guestEmail;
+      userName = guestName || "Guest";
+    }
 
     // Before Booking Check Availability
     const isAvailable = await checkAvailability({
@@ -76,27 +110,42 @@ export const createBooking = async (req, res) => {
       totalPrice,
     });
 
-    const mailOptions = {
-    from: process.env.SENDER_EMAIL,
-    to: req.user.email, // Changed from request.user.email to req.user.email
-    subject: 'Hotel Booking Details',
-    html: `
-        <h2>Your Booking Details</h2>
-        <p>Dear, ${req.user.username}, </p>
-        <p>Thank you for your booking! Here are your booking details:</p>
-        <ul
-            <li><strong>Booking ID:</strong> ${booking._id}</li>
-            <li><strong>Hotel Name:</strong> ${roomData.hotel.name}</li>
-            <li><strong>Location:</strong> ${roomData.hotel.address}</li>
-            <li><strong>Date:</strong> ${booking.checkInDate.toString()}</li>
-            <li><strong>Booking Amount:</strong> ${process.env.CURRENCY || '₹'} ${booking.totalPrice} /night </li>
-        </ul>
-        <p>We look forward to welcoming you!</p>
-        <p>If you need to make any changes, feel free to contact us.</p>
-    `
-};
+    // Send email notification (optional - won't fail booking if email fails)
+    if (process.env.SENDER_EMAIL && process.env.SENDER_PASSWORD) {
+      try {
+        console.log("Sending email to:", userEmail);
+        const mailOptions = {
+          from: process.env.SENDER_EMAIL,
+          to: userEmail,
+          subject: 'Hotel Booking Details',
+          html: `
+              <h2>Your Booking Details</h2>
+              <p>Dear ${userName}, </p>
+              <p>Thank you for your booking! Here are your booking details:</p>
+              <ul>
+                  <li><strong>Booking ID:</strong> ${booking._id}</li>
+                  <li><strong>Hotel Name:</strong> ${roomData.hotel.name}</li>
+                  <li><strong>Location:</strong> ${roomData.hotel.address}</li>
+                  <li><strong>Check-in Date:</strong> ${booking.checkInDate.toString()}</li>
+                  <li><strong>Check-out Date:</strong> ${booking.checkOutDate.toString()}</li>
+                  <li><strong>Guests:</strong> ${booking.guests}</li>
+                  <li><strong>Total Amount:</strong> ${process.env.CURRENCY || '₹'} ${booking.totalPrice}</li>
+              </ul>
+              <p>We look forward to welcoming you!</p>
+              <p>If you need to make any changes, feel free to contact us.</p>
+          `
+        };
 
-await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
+        console.log("Email sent successfully");
+      } catch (emailError) {
+        console.log("Email sending failed:", emailError.message);
+        console.log("Booking will still be created successfully");
+        // Don't fail the booking if email fails
+      }
+    } else {
+      console.log("Email configuration not found - skipping email notification");
+    }
 
     // const mailOptions = {
     //   from: process.env.SENDER_EMAIL,
@@ -123,9 +172,19 @@ await transporter.sendMail(mailOptions);
     res.json({ success: true, message: "Booking created successfully" });
 
   } catch (error) {
-    console.log(error);
+    console.log("=== BOOKING ERROR DETAILS ===");
+    console.log("Error message:", error.message);
+    console.log("Error stack:", error.stack);
+    console.log("Request body:", req.body);
+    console.log("User:", req.user);
+    console.log("=============================");
     
-    res.json({ success: false, message: "Failed to create booking" });
+    res.json({ 
+      success: false, 
+      message: "Failed to create booking",
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 

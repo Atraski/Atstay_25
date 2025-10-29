@@ -3,19 +3,22 @@ import { useParams } from 'react-router-dom'
 import {assets, facilityIcons} from '../assets/assets'
 import { useEffect } from 'react'
 import StarRating from '../components/StarRating'
-import { useAppContext } from '../context/AppContext'
+import { useAppContext } from './../context/AppContext'
 import { roomCommonData } from '../assets/assets'
 import toast from 'react-hot-toast';
+import { useAuth, useClerk } from '@clerk/clerk-react';
 const RoomDetails = () => {
     const {id} = useParams();
     const { rooms, getToken, axios, navigate } = useAppContext();
+    const { isSignedIn } = useAuth();
+    const { openSignIn } = useClerk();
     const [room, setRoom] = useState(null);
     const [mainImage, setMainImage] = useState(null);
     const[checkInDate, setCheckInDate] = useState(null);
     const[checkOutDate, setCheckOutDate] = useState(null);
     const [guests, setGuests] = useState(1);
-
-    const[isAvailable, setIsAvailable] = useState(false);
+    const [isAvailable, setIsAvailable] = useState(false);
+    const [pendingBooking, setPendingBooking] = useState(false);
 
     //Check if the Room is available 
 
@@ -55,35 +58,41 @@ const RoomDetails = () => {
     }
 
     //OnSubmitHandler function to check availability & book the room 
-
-    const OnSubmitHandler = async (e)=>
-    {
+    const OnSubmitHandler = async (e) => {
       try {
         e.preventDefault();
-        if(!isAvailable)
-        {
+        
+        if(!isAvailable) {
           return checkAvailability();
         }
-        else 
-        {
-          const {data} = await axios.post('/api/bookings/book', {room:id, 
-            checkInDate, checkOutDate, guests, paymentMethod: "Pay At Hotel"
-          }, {headers: {Authorization: `Bearer ${await getToken()}`}})
-          if(data.success)
-          {
-            toast.success(data.message)
-            navigate('/my-bookings')
-            scrollTo(0,0)
-          }
-          else 
-          {
-            toast.error(data.message)
-          }
+        
+        // Check if user is signed in
+        if (!isSignedIn) {
+          // User not logged in - set pending booking and open Clerk sign-in modal
+          setPendingBooking(true);
+          openSignIn();
+          return;
+        }
+        
+        // User is authenticated - proceed with booking
+        const {data} = await axios.post('/api/bookings/book', {
+          room: id, 
+          checkInDate, 
+          checkOutDate, 
+          guests, 
+          paymentMethod: "Pay At Hotel"
+        }, {headers: {Authorization: `Bearer ${await getToken()}`}})
+        
+        if(data.success) {
+          toast.success(data.message)
+          navigate('/my-bookings')
+          scrollTo(0,0)
+        } else {
+          toast.error(data.message)
         }
         
       } catch (error) {
         toast.error(error.message)
-        
       }
     }
            
@@ -95,6 +104,37 @@ const RoomDetails = () => {
           room && setMainImage(room.images[0])
 
         },[rooms])
+
+    // Handle booking after successful sign-in
+    useEffect(() => {
+      const completeBookingAfterSignIn = async () => {
+        if (isSignedIn && pendingBooking && isAvailable) {
+          try {
+            setPendingBooking(false); // Reset pending state
+            
+            const {data} = await axios.post('/api/bookings/book', {
+              room: id, 
+              checkInDate, 
+              checkOutDate, 
+              guests, 
+              paymentMethod: "Pay At Hotel"
+            }, {headers: {Authorization: `Bearer ${await getToken()}`}})
+            
+            if(data.success) {
+              toast.success(data.message)
+              navigate('/my-bookings')
+              scrollTo(0,0)
+            } else {
+              toast.error(data.message)
+            }
+          } catch (error) {
+            toast.error(error.message)
+          }
+        }
+      };
+
+      completeBookingAfterSignIn();
+    }, [isSignedIn, pendingBooking, isAvailable, id, checkInDate, checkOutDate, guests, axios, getToken, navigate]);
 
    return room && (
     <div className = 'py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32'>

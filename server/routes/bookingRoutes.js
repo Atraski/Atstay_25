@@ -9,6 +9,10 @@ import { protect } from "../middleware/authMiddleware.js"
 
 const bookingRouter = express.Router() 
 
+bookingRouter.use((req, _res, next) => {
+    console.log("[bookings]", req.method, req.path);
+    next();
+  });
 
 bookingRouter.post("/check-availability", checkAvailabilityAPI)
 
