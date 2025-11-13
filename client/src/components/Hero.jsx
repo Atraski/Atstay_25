@@ -37,7 +37,7 @@ const Hero = () =>
             <div className = ''>  
                 <span className="bg-[#67c7b9]/90 px-3.5 py-1 rounded-full mt-20">The Ultimate Hotel Experience</span>
                <h1 className = "font-playfair text-2xl md:text-5xl md:text-[56px] md:leading-[56px] font-bold md:font-extrabold max-w-xl mt-4">Discover Your Perfect Gateway Destination</h1>
-               <p className = "max-w-130 mt-2 text-sm md:text-base">Unparalled luxury and comfort await at the world's most exclusive <br />
+               <p className = "max-w-130 mt-2 text-sm md:text-base">Affordable luxury and comfort await at the world's most exclusive <br />
                  hotels and resorts. Start your journey Today</p>
                  
             </div>

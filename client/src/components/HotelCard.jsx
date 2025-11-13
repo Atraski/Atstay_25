@@ -5,7 +5,7 @@ import { assets, roomsDummyData } from "../assets/assets";
 const HotelCard  = ({room, index}) =>
 {
     return (
-<Link
+<Link   
   to={'/rooms/' + room._id}
   onClick={() => scrollTo(0, 0)}
   key={room._id}

@@ -1,5 +1,6 @@
 import React from 'react'
 import { assets } from '../assets/assets'
+import { Link } from 'react-router-dom';
 const Footer = () => {
   return (
     <div>
@@ -61,11 +62,12 @@ const Footer = () => {
             <hr className='border-gray-300 mt-8' />
             <div className='flex flex-col md:flex-row gap-2 items-center justify-between py-5'>
                 <p>© {new Date().getFullYear()} <a href="https://prebuiltui.com">AtStay</a>. All rights reserved.</p>
-                <ul className='flex items-center gap-4'>
-                    <li><a href="#">Privacy</a></li>
-                    <li><a href="#">Terms</a></li>
-                    <li><a href="#">Sitemap</a></li>
-                </ul>
+                <div className="flex gap-7 md:gap-8 items-center justify-end mt-8 text-base text-gray-800 font-inter">
+                    <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:text-orange-600 transition">Privacy Policy</a>
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-orange-600 transition">Terms & Conditions</a>
+                    <a href="/refund-policy" target="_blank" rel="noopener noreferrer" className="hover:text-orange-600 transition">Refund Policy</a>
+                    <a href="/contact" target="_blank" rel="noopener noreferrer" className="hover:text-orange-600 transition">Contact Us</a>
+                </div>
             </div>
         </div>
     </div>

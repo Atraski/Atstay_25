@@ -13,6 +13,10 @@ import AddRoom from './pages/hotelOwner/AddRoom';
 import ListRoom from './pages/hotelOwner/ListRoom';
 import {Toaster} from 'react-hot-toast';
 import { useAppContext } from './context/AppContext';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import Terms from './pages/Terms';
+import RefundPolicy from './pages/RefundPolicy';
+import Contact from './pages/Contact';
 
 function App() {
 
@@ -38,6 +42,10 @@ function App() {
           <Route path="list-room" element = {<ListRoom/>} />
 
           </Route>
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
+          <Route path="/contact" element={<Contact />} />
 
         </Routes>
 
