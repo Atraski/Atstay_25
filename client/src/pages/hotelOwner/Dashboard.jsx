@@ -1,22 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Title from '../../components/Title';
 import { assets } from '../../assets/assets';
 import { useAppContext } from '../../context/AppContext';
-import { toast } from 'react-hot-toast'; // ✅ add this import
+import { toast } from 'react-hot-toast';
 
 const Dashboard = () => {
-  const { currency, user, getToken, axios } = useAppContext(); // ❌ remove toast from context
+  const { currency, user, getToken, axios } = useAppContext();
   const [dashboardData, setDashboardData] = useState({
     bookings: [],
     totalBookings: 0,
     totalRevenue: 0,
   });
+  const [loading, setLoading] = useState(false);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
+    setLoading(true);
     try {
       const token = await getToken();
       const { data } = await axios.get('/api/bookings/hotel', {
-        // ✅ 'headers' (not 'header')
         headers: { Authorization: `Bearer ${token}` },
       });
       if (data?.success) {
@@ -25,15 +26,16 @@ const Dashboard = () => {
         toast.error(data?.message || 'Failed to load dashboard data');
       }
     } catch (error) {
-      // ✅ safe error message
       const msg = error?.response?.data?.message || error?.message || 'Request failed';
       toast.error(msg);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [getToken, axios]);
 
   useEffect(() => {
     if (user) fetchDashboardData();
-  }, [user]);
+  }, [user, fetchDashboardData]);
 
   return (
     <div>
@@ -69,20 +71,29 @@ const Dashboard = () => {
       {/* Recent Bookings */}
       <h2 className="text-xl text-blue-950/70 font-medium mb-5">Recent Bookings</h2>
 
-      <div className="w-full max-w-3xl text-left border border-gray-300 rounded-lg max-h-80 overflow-y-scroll">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="py-3 px-4 text-gray-800 font-medium">User Name</th>
-              <th className="py-3 px-4 text-gray-800 font-medium max-sm:hidden">Room Name</th>
-              <th className="py-3 px-4 text-gray-800 font-medium text-center">Total Amount</th>
-              <th className="py-3 px-4 text-gray-800 font-medium text-center">Payment Status</th>
-            </tr>
-          </thead>
+      {loading ? (
+        <div className="py-10 text-center">
+          <p className="text-gray-500">Loading dashboard data...</p>
+        </div>
+      ) : dashboardData.bookings.length === 0 ? (
+        <div className="py-10 text-center">
+          <p className="text-gray-500">No bookings found.</p>
+        </div>
+      ) : (
+        <div className="w-full max-w-3xl text-left border border-gray-300 rounded-lg max-h-80 overflow-y-scroll">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="py-3 px-4 text-gray-800 font-medium">User Name</th>
+                <th className="py-3 px-4 text-gray-800 font-medium max-sm:hidden">Room Name</th>
+                <th className="py-3 px-4 text-gray-800 font-medium text-center">Total Amount</th>
+                <th className="py-3 px-4 text-gray-800 font-medium text-center">Payment Status</th>
+              </tr>
+            </thead>
 
-          <tbody className="text-sm">
-            {(dashboardData.bookings || []).map((item, index) => (
-              <tr key={index}>
+            <tbody className="text-sm">
+              {(dashboardData.bookings || []).map((item) => (
+                <tr key={item._id || item.id || Math.random()}>
                 <td className="py-3 px-4 text-gray-700 border-t border-gray-300">
                   {item?.user?.username}
                 </td>
@@ -105,10 +116,11 @@ const Dashboard = () => {
                   </button>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { createContext, useEffect, useState, useContext } from "react";
+import { createContext, useEffect, useState, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { toast } from "react-hot-toast";
@@ -25,7 +25,7 @@ export const AppProvider = ({ children }) => {
   const [searchedCities, setSearchedCities] = useState([]);
   const [rooms, setRooms] = useState([]);
 
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     try {
       const { data } = await axios.get("/api/rooms");
       if (data.success) setRooms(data.rooms);
@@ -33,9 +33,9 @@ export const AppProvider = ({ children }) => {
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message || "Request failed");
     }
-  };
+  }, []);
 
-  const fetchRoomById = async (roomId) => {
+  const fetchRoomById = useCallback(async (roomId) => {
     try {
       const { data } = await axios.get(`/api/rooms/${roomId}`);
       if (data.success) return data.room;
@@ -45,9 +45,10 @@ export const AppProvider = ({ children }) => {
       toast.error(error?.response?.data?.message || error.message || "Request failed");
       return null;
     }
-  };
+  }, []);
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async (retryCount = 0) => {
+    const MAX_RETRIES = 3;
     try {
       const token = await getToken();
       if (!token) return; // Exit if no token
@@ -58,28 +59,33 @@ export const AppProvider = ({ children }) => {
       if (data.success && data.user) {
         setIsOwner(data.user.role === "hotelOwner");
         setSearchedCities(data.user.recentSearchedCities || []);
-      } else {
-        setTimeout(fetchUser, 5000);
+      } else if (retryCount < MAX_RETRIES) {
+        setTimeout(() => fetchUser(retryCount + 1), 5000);
       }
     } catch (error) {
-      console.log('User fetch error:', error);
-      // Don't show error toast for user fetch failures
+      // Silently handle user fetch errors - don't spam user with toasts
+      if (retryCount < MAX_RETRIES) {
+        setTimeout(() => fetchUser(retryCount + 1), 5000);
+      }
     }
-  };
+  }, [getToken]);
 
   useEffect(() => {
-    console.log("API_BASE:", API_BASE);
-    console.log("axios.defaults.baseURL:", axios.defaults.baseURL);
-    if (!API_BASE) console.warn("VITE_BACKEND_URL is missing!");
+    if (!API_BASE) {
+      // Only warn in development
+      if (import.meta.env.DEV) {
+        console.warn("VITE_BACKEND_URL is missing!");
+      }
+    }
   }, []);
 
   useEffect(() => {
     if (user) fetchUser();
-  }, [user]);
+  }, [user, fetchUser]);
 
   useEffect(() => {
     fetchRooms();
-  }, []);
+  }, [fetchRooms]);
 
   const value = {
     currency,

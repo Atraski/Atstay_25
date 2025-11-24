@@ -12,8 +12,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@cashfreepayments/cashfree-js": "^1.0.5",
     "@clerk/express": "^1.7.31",
-    "cashfree-pg": "^5.1.0",
+    "axios": "^1.12.2",
     "cloudinary": "^2.7.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",

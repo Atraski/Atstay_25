@@ -1,19 +1,33 @@
 import React, { useState } from "react";
 import { cities } from "../assets/assets";
 import {useAppContext} from '../context/AppContext'
+import { useAuth } from '@clerk/clerk-react';
+
 const Hero = () =>
 {
-    const {navigate, getToken, axios, setSearchedCities} = useAppContext()
+    const {navigate, getToken, axios, setSearchedCities, user} = useAppContext()
+    const { isSignedIn } = useAuth();
     const [destination, setDestination] = useState("")
 
     const onSearch = async(e)=>
     {
         e.preventDefault();
+        if (!destination.trim()) return;
+        
         navigate(`/rooms?destination=${destination}`)
 
-        //Call API to save recent searched city
-
-        await axios.post('/api/user/store-recent-search', {recentSearchedCity: destination}, {headers:{Authorization: `Bearer ${await getToken()}` }});
+        //Call API to save recent searched city (only if user is signed in)
+        if (isSignedIn && user) {
+            try {
+                await axios.post('/api/user/store-recent-search', 
+                    {recentSearchedCity: destination}, 
+                    {headers:{Authorization: `Bearer ${await getToken()}` }}
+                );
+            } catch (error) {
+                // Silently fail - don't interrupt user flow
+                console.error('Failed to save recent search:', error);
+            }
+        }
 
         //add destination to searchedCities max 3 recent searched cities 
         setSearchedCities((prevSearchedCities)=>

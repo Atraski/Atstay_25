@@ -21,7 +21,7 @@ const AddRoom = () => {
     roomType: '',
     pricePerNight: 0,
     amenities: {
-      'Free Wifi': false,
+      'Free WiFi': false,
       'Free Breakfast': false,
       'Room Service': false,
       'Mountain View': false,
@@ -78,7 +78,7 @@ const [loading, setLoading] = useState(false);
               'Free WiFi': false,
               'Free Breakfast': false,
               'Room Service': false,
-              'Moutain View': false,
+              'Mountain View': false,
               'Pool Access': false
             }
 
@@ -88,12 +88,13 @@ const [loading, setLoading] = useState(false);
       }
       else 
       {
-        toast.error(data.message)
+        toast.error(data.message || 'Failed to add room')
       }
 
     
   } catch (error) {
-    toast.error(error.message)
+    const errorMessage = error?.response?.data?.message || error.message || 'Failed to add room';
+    toast.error(errorMessage)
     
   }
   finally

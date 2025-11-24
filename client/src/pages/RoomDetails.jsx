@@ -19,11 +19,14 @@ const RoomDetails = () => {
     const [guests, setGuests] = useState(1);
     const [isAvailable, setIsAvailable] = useState(false);
     const [pendingBooking, setPendingBooking] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [checkingAvailability, setCheckingAvailability] = useState(false);
 
     //Check if the Room is available 
 
     const checkAvailability = async ()=>
     {
+      setCheckingAvailability(true);
       try {
         //Check is Check-In Date is greater than Check-Out Date
         if(checkInDate >= checkOutDate)
@@ -49,11 +52,14 @@ const RoomDetails = () => {
           }
           else 
           {
-            toast.error(data.message)
+            toast.error(data.message || 'Failed to check availability')
           }
       } catch (error) {
-        toast.error(error.message)
+        const errorMessage = error?.response?.data?.message || error.message || 'Failed to check availability';
+        toast.error(errorMessage)
         
+      } finally {
+        setCheckingAvailability(false);
       }
     }
 
@@ -61,8 +67,10 @@ const RoomDetails = () => {
     const OnSubmitHandler = async (e) => {
       try {
         e.preventDefault();
+        setLoading(true);
         
         if(!isAvailable) {
+          setLoading(false);
           return checkAvailability();
         }
         
@@ -71,6 +79,7 @@ const RoomDetails = () => {
           // User not logged in - set pending booking and open Clerk sign-in modal
           setPendingBooking(true);
           openSignIn();
+          setLoading(false);
           return;
         }
         
@@ -84,15 +93,18 @@ const RoomDetails = () => {
         }, {headers: {Authorization: `Bearer ${await getToken()}`}})
         
         if(data.success) {
-          toast.success(data.message)
+          toast.success(data.message || 'Booking created! Please complete payment from My Bookings.')
           navigate('/my-bookings')
           scrollTo(0,0)
         } else {
-          toast.error(data.message)
+          toast.error(data.message || 'Failed to book room')
         }
         
       } catch (error) {
-        toast.error(error.message)
+        const errorMessage = error?.response?.data?.message || error.message || 'Failed to book room';
+        toast.error(errorMessage)
+      } finally {
+        setLoading(false);
       }
     }
            
@@ -125,10 +137,11 @@ const RoomDetails = () => {
               navigate('/my-bookings')
               scrollTo(0,0)
             } else {
-              toast.error(data.message)
+              toast.error(data.message || 'Failed to complete booking')
             }
           } catch (error) {
-            toast.error(error.message)
+            const errorMessage = error?.response?.data?.message || error.message || 'Failed to complete booking';
+            toast.error(errorMessage)
           }
         }
       };
@@ -136,14 +149,22 @@ const RoomDetails = () => {
       completeBookingAfterSignIn();
     }, [isSignedIn, pendingBooking, isAvailable, id, checkInDate, checkOutDate, guests, axios, getToken, navigate]);
 
-   return room && (
+   if (!room) {
+     return (
+       <div className='py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32 text-center'>
+         <p className="text-gray-500 text-lg">Loading room details...</p>
+       </div>
+     );
+   }
+
+   return (
     <div className = 'py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32'>
 
       {/* Room Details */}
       <div className='flex flex-col md:flex-row items-start md:items-center gap-2'>
         <h1 className='text-3xl md:text-4xl font-playfair'> 
           {room.hotel.name} <span className='font-inter text-sm'>({room.roomType})</span></h1>
-        <p className='tex-xs font-inter py-1.5 px-3 text-white bg-orange-500 rounded-full'>20% OFF</p>
+        <p className='text-xs font-inter py-1.5 px-3 text-white bg-orange-500 rounded-full'>20% OFF</p>
       </div>
 
 
@@ -235,10 +256,13 @@ const RoomDetails = () => {
 
 
         </div>
-        <button type = 'submit' className='bg-primary hover:bg-primary-dull
-        active:scale-95 transition-all text-white rounded-md max-md:w-full 
-        max-md:mt-6 md:px-25 py-3 md:py-4 text-base cursor-pointer'>
-          {isAvailable? "Book Now" : "Check Availability"} 
+        <button 
+          type = 'submit' 
+          disabled={loading || checkingAvailability}
+          className='bg-primary hover:bg-primary-dull
+          active:scale-95 transition-all text-white rounded-md max-md:w-full 
+          max-md:mt-6 md:px-25 py-3 md:py-4 text-base cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'>
+          {loading ? "Processing..." : checkingAvailability ? "Checking..." : isAvailable ? "Book Now" : "Check Availability"} 
           </button>
 
       </form>
@@ -270,7 +294,7 @@ const RoomDetails = () => {
        {/* Hosted By */}
        <div className='flex flex-col items-start gap-4'>
         <div className='flex gap-4'>
-          <img  alt="Host" className='h-14 w-14 md:h-18 md:w-18 rounded-full' />
+          <img src={room.hotel.owner?.image || "https://via.placeholder.com/72"} alt={`Host ${room.hotel.name}`} className='h-14 w-14 md:h-18 md:w-18 rounded-full' />
           <div>
             <p className='text-lg md:text-xl'>Hosted by {room.hotel.name}</p>
             <div className='flex items-center mt-1'>

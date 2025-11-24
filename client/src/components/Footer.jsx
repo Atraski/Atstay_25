@@ -7,19 +7,27 @@ const Footer = () => {
         <div className='bg-[#67c7b9] text-black-100/80 pt-8 px-6 md:px-16 lg:px-24 xl:px-32'>
             <div className='flex flex-wrap justify-between gap-12 md:gap-6'>
                 <div className='max-w-80'>
-                    <img src={assets.logo}alt="logo" className='mb-4 h-8 md:h-9 invert opacity-80' />
+                    <img src={assets.logo} alt="AtStay logo" className='mb-4 h-8 md:h-9 invert opacity-80' />
                     <p className='text-sm'>
                         AtStay is your gateway to exclusive and luxurious accommodations around the world. Discover unique stays, personalized service, and unforgettable experiences with us.
                     </p>
                     <div className='flex items-center gap-3 mt-4'>
                         
-                        <img src={assets.instagramIcon} alt='instagram-logo' className = 'w-6' />
+                        <a href="#" aria-label="Visit our Instagram" className="hover:opacity-70 transition-opacity">
+                            <img src={assets.instagramIcon} alt='Instagram' className = 'w-6' />
+                        </a>
                         
-                        <img src={assets.facebookIcon} alt="facebook-icon" className = 'w-6' />
+                        <a href="#" aria-label="Visit our Facebook" className="hover:opacity-70 transition-opacity">
+                            <img src={assets.facebookIcon} alt="Facebook" className = 'w-6' />
+                        </a>
 
-                        <img src={assets.twitterIcon} alt="twitter-icon" className = 'w-6' />
+                        <a href="#" aria-label="Visit our Twitter" className="hover:opacity-70 transition-opacity">
+                            <img src={assets.twitterIcon} alt="Twitter" className = 'w-6' />
+                        </a>
                         
-                        <img src={assets.linkendinIcon} alt="linkedIn-icon" className = 'w-6' />
+                        <a href="#" aria-label="Visit our LinkedIn" className="hover:opacity-70 transition-opacity">
+                            <img src={assets.linkendinIcon} alt="LinkedIn" className = 'w-6' />
+                        </a>
                     </div>
                 </div>
 

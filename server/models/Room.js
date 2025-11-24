@@ -31,7 +31,10 @@ const roomSchema = new mongoose.Schema({
 
 },{timestamps: true});
 
-
+// Indexes for better query performance
+roomSchema.index({ hotel: 1 });
+roomSchema.index({ isAvailable: 1 });
+roomSchema.index({ createdAt: -1 });
 
 const Room = mongoose.model("Room", roomSchema);
 

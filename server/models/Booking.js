@@ -85,7 +85,13 @@ const bookingSchema = new mongoose.Schema({
 
 },{timestamps: true});
 
-
+// Indexes for better query performance
+bookingSchema.index({ user: 1 });
+bookingSchema.index({ room: 1 });
+bookingSchema.index({ hotel: 1 });
+bookingSchema.index({ checkInDate: 1, checkOutDate: 1 }); // For availability queries
+bookingSchema.index({ status: 1 });
+bookingSchema.index({ createdAt: -1 });
 
 const Booking = mongoose.model("Booking", bookingSchema);
 

@@ -30,7 +30,9 @@ export const protect = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.log("Auth middleware error:", error);
-    res.status(500).json({ success: false, message: "Authentication failed" });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message || "Authentication failed" 
+    });
   }
 };

@@ -4,7 +4,7 @@ import { testimonials } from '../assets/assets'
 import StarRating from './StarRating'
 const Testimonial = () => {
   return (
-    <div className = 'flex flex-col items-center px-6 md:px-16 lg:lx-24 bg-slate-50 pt-20 pb-30'>
+    <div className = 'flex flex-col items-center px-6 md:px-16 lg:px-24 bg-slate-50 pt-20 pb-30'>
         <Title title = "What our Guest say" subTitle = "Discover why travelers consistently choose Atstay for their exclusive and luxurious accomodations around the world."/>
 
         <div className="flex flex-wrap items-center gap-6 mt-20">

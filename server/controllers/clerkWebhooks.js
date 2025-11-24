@@ -18,7 +18,11 @@ const clerkWebhooks  = async (req, res) => {
 
     // Parse payload from raw buffer
     const payload = JSON.parse(req.body.toString());
-    console.log("Received Webhook payload:", JSON.stringify(payload, null, 2));
+    
+    // Only log in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Received Webhook payload:", JSON.stringify(payload, null, 2));
+    }
 
     const { data, type } = payload;
 

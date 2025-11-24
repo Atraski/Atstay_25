@@ -35,6 +35,7 @@ const AllRooms = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { facilityIcons, navigate, rooms, currency } = useAppContext();
   const [openFilters, setOpenFilters] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Selected filters
   const [selectedFilters, setSelectedFilters] = useState({
@@ -113,13 +114,24 @@ const AllRooms = () => {
           </p>
         </div>
 
-        {filteredRooms.map((room) => {
-          const cover = getCover(room.images);
-          return (
-            <div
-              key={room._id}
-              className="flex flex-col md:flex-row items-start py-10 gap-6 border-b border-gray-300 last:pb-30 last:border-0"
+        {filteredRooms.length === 0 ? (
+          <div className="py-20 text-center">
+            <p className="text-gray-500 text-lg">No rooms found matching your criteria.</p>
+            <button 
+              onClick={clearFilters}
+              className="mt-4 px-4 py-2 text-sm font-medium border border-gray-300 rounded bg-white hover:bg-gray-50 transition-all cursor-pointer"
             >
+              Clear Filters
+            </button>
+          </div>
+        ) : (
+          filteredRooms.map((room) => {
+            const cover = getCover(room.images);
+            return (
+              <div
+                key={room._id}
+                className="flex flex-col md:flex-row items-start py-10 gap-6 border-b border-gray-300 last:pb-30 last:border-0"
+              >
               {/* Room Image */}
               {cover ? (
                 <img
@@ -184,7 +196,8 @@ const AllRooms = () => {
               </div>
             </div>
           );
-        })}
+          })
+        )}
       </div>
 
       {/* Filters */}

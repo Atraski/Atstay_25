@@ -25,7 +25,9 @@ const hotelSchema = new mongoose.Schema({
 
 },{timestamps: true});
 
-
+// Indexes for better query performance
+hotelSchema.index({ owner: 1 });
+hotelSchema.index({ city: 1 });
 
 const Hotel = mongoose.model("Hotel", hotelSchema);
 

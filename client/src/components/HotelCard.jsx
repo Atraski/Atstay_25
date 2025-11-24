@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { assets, roomsDummyData } from "../assets/assets";
+import { assets } from "../assets/assets";
 
 const HotelCard  = ({room, index}) =>
 {
@@ -13,7 +13,7 @@ const HotelCard  = ({room, index}) =>
 >
   <img
     src={room.images[0]}
-    alt=""
+    alt={`${room.hotel.name} room image`}
     className="w-full h-[200px] object-cover"
   />
 
@@ -28,8 +28,9 @@ const HotelCard  = ({room, index}) =>
       <p className='font-playfair text-xl font-medium text-gray-800'>
         {room.hotel.name}
       </p>
-      <div className='flex items-center gap-1'>
-        <img src={assets.starIconFilled} alt="star-icon" /> 4.5
+      <div className='flex items-center gap-1' aria-label="Rating: 4.5 stars">
+        <img src={assets.starIconFilled} alt="star" /> 
+        <span>4.5</span>
       </div>
     </div>
 
